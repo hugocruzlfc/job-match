@@ -1,5 +1,5 @@
 import AppSidebarClient from "@/components/app-sidebar-client";
-import { SignedOut } from "@/components/clerk/sign-in-status";
+import { SignedIn, SignedOut } from "@/components/clerk/sign-in-status";
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +12,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { SidebarUserButton } from "@/components/users/sidebar-user-buton";
 import { LogInIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -40,13 +41,15 @@ export default function Home() {
               </SidebarMenu>
             </SidebarGroup>
           </SidebarContent>
-          <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton>hello</SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
+          <SignedIn>
+            <SidebarFooter>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarUserButton />
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarFooter>
+          </SignedIn>
         </Sidebar>
         <main className="flex-1">Content goes here</main>
       </AppSidebarClient>

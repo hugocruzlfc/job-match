@@ -1,3 +1,4 @@
 ignoredBuiltDependencies:
+  - inngest-cli
   - sharp
   - unrs-resolver

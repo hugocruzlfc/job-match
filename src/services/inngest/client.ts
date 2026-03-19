@@ -9,11 +9,9 @@ import {
 } from "@clerk/nextjs/server";
 
 type ClerkWebhookData<T> = {
-  data: {
-    data: T;
-    raw: string;
-    headers: Record<string, string>;
-  };
+  data: T;
+  raw: string;
+  headers: Record<string, string>;
 };
 
 // Event type definitions
@@ -129,9 +127,6 @@ export const emailDailyOrganizationUserApplications = eventType(
 
 export const inngest = new Inngest({
   id: "job-match",
+  // Configuraciones para desarrollo local y producción
   isDev: process.env.NODE_ENV === "development",
-  checkpointing: {
-    // Set maxRuntime to ~80% of Vercel's function timeout (300s)
-    maxRuntime: "240s",
-  },
 });

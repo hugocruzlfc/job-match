@@ -1,17 +1,31 @@
-import { insertUser } from "@/data-layer/users/db";
+import { insertUser, insertUserNotificationSettings } from "@/data-layer/users";
 import { env } from "@/env/server";
 import { NonRetriableError } from "inngest";
 import { Webhook } from "svix";
 import { clerkUserCreated, inngest } from "../client";
 
+/**
+ * Verifica la firma del webhook de Clerk usando la librería svix
+ * @param raw - El cuerpo raw del webhook como string
+ * @param headers - Los headers del webhook incluyendo la firma de Svix
+ */
 function verifyClerkWebhook({
   raw,
   headers,
 }: {
   raw: string;
-  headers: Record<string, string>;
+  headers: Record<string, string> | undefined;
 }) {
-  return new Webhook(env.CLERK_SECRET_KEY).verify(raw, headers);
+  // Asegurarse de que headers sea un objeto válido
+  const validHeaders = headers || {};
+
+  // Convertir headers a strings si no lo están ya (por compatibilidad)
+  const processedHeaders: Record<string, string> = {};
+  for (const [key, value] of Object.entries(validHeaders)) {
+    processedHeaders[key] = String(value);
+  }
+
+  return new Webhook(env.CLERK_WEBHOOK_SECRET).verify(raw, processedHeaders);
 }
 
 export const clerkCreateUser = inngest.createFunction(
@@ -21,29 +35,34 @@ export const clerkCreateUser = inngest.createFunction(
     triggers: [clerkUserCreated],
   },
   async ({ event, step }) => {
-    await step.run("Verify Clerk Webhook", async () => {
+    await step.run("verify-webhook", async () => {
+      // En desarrollo, podemos saltarnos la verificación si hay problemas
+
       try {
         verifyClerkWebhook({
-          raw: event.data.data.raw,
-          headers: event.data.data.headers,
+          raw: event.data.raw,
+          headers: event.data.headers,
         });
       } catch (error) {
-        console.error("Failed to verify Clerk webhook:", error);
         throw new Error("Invalid webhook signature");
       }
     });
 
-    const userId = await step.run("Create User", async () => {
-      const userData = event.data.data.data;
+    const userId = await step.run("create-user", async () => {
+      // Los datos del usuario de Clerk están en event.data.data
+      const userData = event.data.data;
+
+      // Buscar el email primario del usuario
       const email =
         userData.email_addresses.find(
-          (email) => email.id === userData.primary_email_address_id,
+          (email: any) => email.id === userData.primary_email_address_id,
         ) || null;
 
       if (email === null) {
         throw new NonRetriableError("No primary email address found for user");
       }
 
+      // Crear el usuario en nuestra base de datos
       await insertUser({
         id: userData.id,
         name: `${userData.first_name} ${userData.last_name}`,
@@ -54,6 +73,10 @@ export const clerkCreateUser = inngest.createFunction(
       });
 
       return userData.id;
+    });
+
+    await step.run("create-user-notifications-settings", async () => {
+      await insertUserNotificationSettings({ userId });
     });
   },
 );

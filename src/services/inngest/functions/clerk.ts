@@ -1,8 +1,18 @@
-import { insertUser, insertUserNotificationSettings } from "@/data-layer/users";
+import {
+  deleteUser,
+  insertUser,
+  insertUserNotificationSettings,
+  updateUser,
+} from "@/data-layer/users";
 import { env } from "@/env/server";
 import { NonRetriableError } from "inngest";
 import { Webhook } from "svix";
-import { clerkUserCreated, inngest } from "../client";
+import {
+  clerkUserCreated,
+  clerkUserDeleted,
+  clerkUserUpdated,
+  inngest,
+} from "../client";
 
 /**
  * Verifica la firma del webhook de Clerk usando la librería svix
@@ -77,6 +87,73 @@ export const clerkCreateUser = inngest.createFunction(
 
     await step.run("create-user-notifications-settings", async () => {
       await insertUserNotificationSettings({ userId });
+    });
+  },
+);
+
+export const clerkDeleteUser = inngest.createFunction(
+  {
+    id: "clerk/delete-db-user",
+    name: "Clerk - Delete DB User",
+    triggers: [clerkUserDeleted],
+  },
+  async ({ event, step }) => {
+    await step.run("verify-webhook", async () => {
+      try {
+        verifyClerkWebhook({
+          raw: event.data.raw,
+          headers: event.data.headers,
+        });
+      } catch (error) {
+        throw new Error("Invalid webhook signature");
+      }
+    });
+
+    await step.run("delete-user", async () => {
+      const { id } = event.data.data;
+
+      if (id == null) {
+        throw new NonRetriableError("No id found");
+      }
+      await deleteUser(id);
+    });
+  },
+);
+
+export const clerkUpdateUser = inngest.createFunction(
+  {
+    id: "clerk/update-db-user",
+    name: "Clerk - Update DB User",
+    triggers: [clerkUserUpdated],
+  },
+  async ({ event, step }) => {
+    await step.run("verify-webhook", async () => {
+      try {
+        verifyClerkWebhook({
+          raw: event.data.raw,
+          headers: event.data.headers,
+        });
+      } catch (error) {
+        throw new Error("Invalid webhook signature");
+      }
+    });
+
+    await step.run("update-user", async () => {
+      const userData = event.data.data;
+      const email = userData.email_addresses.find(
+        (email) => email.id === userData.primary_email_address_id,
+      );
+
+      if (email == null) {
+        throw new NonRetriableError("No primary email address found");
+      }
+
+      await updateUser(userData.id, {
+        name: `${userData.first_name} ${userData.last_name}`,
+        imageUrl: userData.image_url,
+        email: email.email_address,
+        updatedAt: new Date(userData.updated_at),
+      });
     });
   },
 );

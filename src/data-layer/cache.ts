@@ -1,5 +1,12 @@
-import { getGlobalTag, getIdTag } from "@/lib/data-cache";
+import {
+  getGlobalTag,
+  getIdTag,
+  getJobListingTag,
+  getOrganizationTag,
+} from "@/lib/data-cache";
 import { revalidateTag } from "next/cache";
+
+/// User cache tags
 
 export function getUserGlobalTag() {
   return getGlobalTag("users");
@@ -14,6 +21,8 @@ export function revalidateUserCache(id: string) {
   revalidateTag(getUserIdTag(id), "max");
 }
 
+/// User Notification Settings cache tags
+
 export function getUserNotificationSettingsGlobalTag() {
   return getGlobalTag("userNotificationSettings");
 }
@@ -26,6 +35,8 @@ export function revalidateUserNotificationSettingsCache(userId: string) {
   revalidateTag(getUserNotificationSettingsGlobalTag(), "max");
   revalidateTag(getUserNotificationSettingsIdTag(userId), "max");
 }
+
+/// Organization User Settings cache tags
 
 export function getOrganizationUserSettingsGlobalTag() {
   return getGlobalTag("organizationUserSettings");
@@ -60,4 +71,59 @@ export function getOrganizationIdTag(id: string) {
 export function revalidateOrganizationCache(id: string) {
   revalidateTag(getOrganizationGlobalTag(), "max");
   revalidateTag(getOrganizationIdTag(id), "max");
+}
+
+///Job Listing Applications cache tags
+
+export function getJobListingApplicationGlobalTag() {
+  return getGlobalTag("jobListingApplications");
+}
+
+export function getJobListingApplicationJobListingTag(jobListingId: string) {
+  return getJobListingTag("jobListingApplications", jobListingId);
+}
+
+export function getJobListingApplicationIdTag({
+  jobListingId,
+  userId,
+}: {
+  jobListingId: string;
+  userId: string;
+}) {
+  return getIdTag("jobListingApplications", `${jobListingId}-${userId}`);
+}
+
+export function revalidateJobListingApplicationCache(id: {
+  userId: string;
+  jobListingId: string;
+}) {
+  revalidateTag(getJobListingApplicationGlobalTag(), "max");
+  revalidateTag(getJobListingApplicationJobListingTag(id.jobListingId), "max");
+  revalidateTag(getJobListingApplicationIdTag(id), "max");
+}
+
+///Job Listings cache tags
+
+export function getJobListingGlobalTag() {
+  return getGlobalTag("jobListings");
+}
+
+export function getJobListingOrganizationTag(organizationId: string) {
+  return getOrganizationTag("jobListings", organizationId);
+}
+
+export function getJobListingIdTag(id: string) {
+  return getIdTag("jobListings", id);
+}
+
+export function revalidateJobListingCache({
+  id,
+  organizationId,
+}: {
+  id: string;
+  organizationId: string;
+}) {
+  revalidateTag(getJobListingGlobalTag(), "max");
+  revalidateTag(getJobListingOrganizationTag(organizationId), "max");
+  revalidateTag(getJobListingIdTag(id), "max");
 }

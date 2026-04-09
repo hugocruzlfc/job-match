@@ -3,9 +3,9 @@ import { SignOutButton } from "@clerk/nextjs";
 import { LogOutIcon } from "lucide-react";
 import { Suspense } from "react";
 import { SidebarMenuButton } from "../ui/sidebar";
-import { SidebarUserButtonClient } from "./sidebar-user-button-client";
+import { AppSidebarUserButtonClient } from "./app-sidebar-user-button-client";
 
-export function SidebarUserButton() {
+export function AppSidebarUserButton() {
   return (
     <Suspense>
       <SidebarUserSuspense />
@@ -27,5 +27,5 @@ async function SidebarUserSuspense() {
     );
   }
 
-  return <SidebarUserButtonClient user={user} />;
+  return <AppSidebarUserButtonClient user={user} />;
 }

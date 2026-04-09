@@ -26,7 +26,7 @@ type User = {
   name: string;
 };
 
-export function SidebarUserButtonClient({ user }: { user: User }) {
+export function AppSidebarUserButtonClient({ user }: { user: User }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const { openUserProfile } = useClerk();
 

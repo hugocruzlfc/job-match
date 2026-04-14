@@ -12,7 +12,7 @@ export const env = createEnv({
     CLERK_WEBHOOK_SECRET: z.string().min(1),
     // UPLOADTHING_TOKEN: z.string().min(1),
     // ANTHROPIC_API_KEY: z.string().min(1),
-    // GEMINI_API_KEY: z.string().min(1),
+    GEMINI_API_KEY: z.string().min(1),
     // RESEND_API_KEY: z.string().min(1),
     // SERVER_URL: z.string().min(1),
   },

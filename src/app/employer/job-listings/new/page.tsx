@@ -1,3 +1,4 @@
+import { JobListingForm } from "@/components/job-listings/job-listing-form";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function NewJobListingPage() {
@@ -8,7 +9,9 @@ export default function NewJobListingPage() {
         This does not post the listing yet. It just saves a draft.
       </p>
       <Card>
-        <CardContent>{/* <JobListingForm /> */}</CardContent>
+        <CardContent>
+          <JobListingForm />
+        </CardContent>
       </Card>
     </div>
   );

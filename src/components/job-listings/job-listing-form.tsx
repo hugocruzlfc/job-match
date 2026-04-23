@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import {
   experienceLevels,
+  JobListingTable,
   jobListingTypes,
   locationRequirements,
   wageIntervals,
@@ -44,44 +45,37 @@ import { StateSelectItems } from "./state-select-items";
 
 const NONE_SELECT_VALUE = "none";
 
-// {
-//   jobListing,
-// }: {
-//   jobListing: Pick<
-//     typeof JobListingTable.$inferSelect,
-//     | "title"
-//     | "description"
-//     | "experienceLevel"
-//     | "id"
-//     | "stateAbbreviation"
-//     | "type"
-//     | "wage"
-//     | "wageInterval"
-//     | "city"
-//     | "locationRequirement"
-//   >;
-// }
-
-export function JobListingForm() {
+export function JobListingForm({
+  jobListing,
+}: {
+  jobListing: Pick<
+    typeof JobListingTable.$inferSelect,
+    | "title"
+    | "description"
+    | "experienceLevel"
+    | "id"
+    | "stateAbbreviation"
+    | "type"
+    | "wage"
+    | "wageInterval"
+    | "city"
+    | "locationRequirement"
+  >;
+}) {
   const form = useForm({
     resolver: zodResolver(jobListingSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      stateAbbreviation: null,
-      city: null,
-      wage: null,
-      wageInterval: "yearly",
-      experienceLevel: "junior",
-      type: "full-time",
-      locationRequirement: "in-office",
+      title: jobListing?.title ?? "",
+      description: jobListing?.description ?? "",
+      stateAbbreviation: jobListing?.stateAbbreviation ?? null,
+      city: jobListing?.city ?? null,
+      wage: jobListing?.wage ?? null,
+      wageInterval: jobListing?.wageInterval ?? "yearly",
+      experienceLevel: jobListing?.experienceLevel ?? "junior",
+      type: jobListing?.type ?? "full-time",
+      locationRequirement: jobListing?.locationRequirement ?? "in-office",
     },
   });
-
-  const jobListing = {
-    title: "Software Engineer",
-    id: "1",
-  };
 
   async function onSubmit(data: z.infer<typeof jobListingSchema>) {
     const action = jobListing

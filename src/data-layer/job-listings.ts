@@ -8,6 +8,8 @@ import {
   getJobListingApplicationJobListingTag,
   getJobListingIdTag,
   getJobListingOrganizationTag,
+  getUserIdTag,
+  getUserResumeIdTag,
   revalidateJobListingCache,
 } from "./cache";
 
@@ -168,4 +170,44 @@ export async function deleteJobListing(id: string) {
   revalidateJobListingCache(deletedJobListing);
 
   return deletedJobListing;
+}
+
+export async function getJobListingApplications(jobListingId: string) {
+  "use cache";
+  cacheTag(getJobListingApplicationJobListingTag(jobListingId));
+
+  const data = await db.query.JobListingApplicationTable.findMany({
+    where: eq(JobListingApplicationTable.jobListingId, jobListingId),
+    columns: {
+      coverLetter: true,
+      createdAt: true,
+      stage: true,
+      rating: true,
+      jobListingId: true,
+    },
+    with: {
+      user: {
+        columns: {
+          id: true,
+          name: true,
+          imageUrl: true,
+        },
+        with: {
+          resume: {
+            columns: {
+              resumeFileUrl: true,
+              aiSummary: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  data.forEach(({ user }) => {
+    cacheTag(getUserIdTag(user.id));
+    cacheTag(getUserResumeIdTag(user.id));
+  });
+
+  return data;
 }

@@ -21,6 +21,19 @@ export function revalidateUserCache(id: string) {
   revalidateTag(getUserIdTag(id), "max");
 }
 
+export function getUserResumeGlobalTag() {
+  return getGlobalTag("userResumes");
+}
+
+export function getUserResumeIdTag(userId: string) {
+  return getIdTag("userResumes", userId);
+}
+
+export function revalidateUserResumeCache(userId: string) {
+  revalidateTag(getUserResumeGlobalTag(), "max");
+  revalidateTag(getUserResumeIdTag(userId), "max");
+}
+
 /// User Notification Settings cache tags
 
 export function getUserNotificationSettingsGlobalTag() {

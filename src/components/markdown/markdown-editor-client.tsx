@@ -19,6 +19,7 @@ import {
   thematicBreakPlugin,
   toolbarPlugin,
 } from "@mdxeditor/editor";
+import "@mdxeditor/editor/style.css";
 import { Ref } from "react";
 import { markdownClassNames } from "./markdown-renderer";
 

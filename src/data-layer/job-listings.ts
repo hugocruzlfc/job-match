@@ -6,6 +6,7 @@ import { and, count, desc, eq } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 import {
   getJobListingApplicationJobListingTag,
+  getJobListingIdTag,
   getJobListingOrganizationTag,
   revalidateJobListingCache,
 } from "./cache";
@@ -45,6 +46,18 @@ export async function getMostRecentJobListing(orgId: string) {
     where: eq(JobListingTable.organizationId, orgId),
     orderBy: desc(JobListingTable.createdAt),
     columns: { id: true },
+  });
+}
+
+export async function getJobListing(id: string, orgId: string) {
+  "use cache";
+  cacheTag(getJobListingIdTag(id));
+
+  return db.query.JobListingTable.findFirst({
+    where: and(
+      eq(JobListingTable.id, id),
+      eq(JobListingTable.organizationId, orgId),
+    ),
   });
 }
 
